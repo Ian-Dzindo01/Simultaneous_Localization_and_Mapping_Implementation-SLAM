@@ -16,7 +16,7 @@ class Display(object):
                 exit(0)
 
         surf = sdl2.ext.pixels3d(self.window.get_surface())
-        surf[:,:,0:3] = img.swapaxes(0,1)
+        surf[:,:,0:3] = img.swapaxes(0,1)       # did not receive the blue color channel, fixed
 
         self.window.refresh()
 

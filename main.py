@@ -15,7 +15,7 @@ def process_image(img):
     display.draw(img)
 
 if __name__ == "__main__":
-    cap = cv2.VideoCapture("test1.mp4")
+    cap = cv2.VideoCapture("video/test1.mp4")
 
     while cap.isOpened():
         ret, frame = cap.read()

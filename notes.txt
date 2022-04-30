@@ -1,0 +1,1 @@
+1. Writing a feature based SLAM not a dense SLAM.
