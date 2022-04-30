@@ -14,6 +14,7 @@ def process_frame(img):
     img = cv2.resize(img, (W, H))
     events = sdl2.ext.get_events()
     cv2.imshow('image', img)
+    cv2.waitKey(1)
 
 if __name__ == "__main__":
     cap = cv2.VideoCapture("test1.mp4")
@@ -24,5 +25,7 @@ if __name__ == "__main__":
         if ret == True:
             process_frame(frame)
         else:
+            cv2.destroyAllWindows()
             break
+
 
