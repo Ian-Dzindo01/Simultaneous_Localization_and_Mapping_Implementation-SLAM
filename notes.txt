@@ -1,1 +1,6 @@
 1. Writing a feature based SLAM not a dense SLAM.
+
+- Cicles not well distributed across the image. Lot better to break the image up in to
+a grid.
+
+- Separate detect and compute. We can do compute later.
