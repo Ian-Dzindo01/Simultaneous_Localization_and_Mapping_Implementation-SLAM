@@ -36,7 +36,6 @@ class FeatureExtractor(object):
         # return akp
 
         feats = cv2.goodFeaturesToTrack(np.mean(img, axis=2).astype(np.uint8), 3000, qualityLevel=0.01, minDistance=3)    # strong corners on an image
-        print(feats)
         return feats
 
 
@@ -50,8 +49,8 @@ def process_image(img):
         print(f)
 
     for f in kp:
-        u, v = map(lambda x: int(round(x)),f[0])
-        cv2.circle(img, (u,v), color=(0,255,0), radius=3)
+        u, v = map(lambda x: int(round(x)), f[0])            # extract feature locations
+        cv2.circle(img, (u,v), color=(0,255,0), radius=3)    # draw circle around points
 
     display.draw(img)
 
