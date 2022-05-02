@@ -6,3 +6,4 @@ a grid.
 - Separate detect and compute. We can do compute later.
 
 - Clusters are a problem. ORB has a border which it can't create.
+################################################################
