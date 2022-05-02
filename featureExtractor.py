@@ -20,14 +20,18 @@ class FeatureExtractor(object):
         kps, des = self.orb.compute(img, kps)                                        # compute keypoints and descriptors
 
         # matching
-        matches = []
+        ret = []
         if self.last is not None:
-            matches = self.bf.knnMatch(des, self.last['des'])                         # using knn instead of regular match
-            matches = zip([kps[m.queryIdx] for m in matches], [self.last['kps'][m.trainIdx] for m in matches])    # query and training data
+            matches = self.bf.knnMatch(des, self.last['des'], k=2)                         # using knn instead of regular match
+
+            # ratio test
+            for m,n in matches:
+                if m.distance < 0.75*n.distance:
+                    ret.append((kps[m.queryIdx], self.last['kps'][m.trainIdx]))
+
 
         self.last = {'kps' : kps, 'des' : des}     # keypoints and descriptors
-
-        return matches
+        return ret
 
 
 # train image is the one learned, query is the image you are trying to match with the
