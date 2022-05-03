@@ -6,4 +6,12 @@ a grid.
 - Separate detect and compute. We can do compute later.
 
 - Clusters are a problem. ORB has a border which it can't create.
+
+- Maybe use a fundamental matrix for filtering.
+
+- Maybe add cross check back in.
+
+- RANSAC is used to negate the massive effect of outliers. Sensor data will always be
+  imperfect.
+
 ################################################################

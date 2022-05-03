@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
-
+from skimage.measure import ransac
+from skimage.transform import FundamentalMatrixTransform       # governs how points correspons to each other
 
 class FeatureExtractor(object):
     GX = 16//2
@@ -27,8 +28,20 @@ class FeatureExtractor(object):
             # ratio test
             for m,n in matches:
                 if m.distance < 0.75*n.distance:
-                    ret.append((kps[m.queryIdx], self.last['kps'][m.trainIdx]))
+                    kp1 = kps[m.queryIdx].pt
+                    kp2 = self.last['kps'][m.trainIdx].pt
+                    ret.append((kp1, kp2))
 
+        ret = np.array(ret)
+
+        # outlier inlier filtering
+        model, inliers = ransac((x[0] for x in ret,
+                                [x[1] for x in ret]), FundamentalMatrixTransform,
+                                min_samples=8, residual_threshold=0.01, max_trial=100 )
+
+
+
+        print(sum(inliers))
 
         self.last = {'kps' : kps, 'des' : des}     # keypoints and descriptors
         return ret
