@@ -8,7 +8,7 @@ class FeatureExtractor(object):
 
     def __init__(self):
         self.orb = cv2.ORB_create(100)   # 1000 nfeatures
-        self.bf = cv2.BFMatcher()        # brute force matcher
+        self.bf = cv2.BFMatcher(cv2.NORM_HAMMING)        # brute force matcher, norm type
         self.last = None
 
     def extract(self, img):
