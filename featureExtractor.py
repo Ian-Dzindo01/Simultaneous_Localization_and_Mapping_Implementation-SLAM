@@ -35,7 +35,7 @@ class FeatureExtractor(object):
         ret = np.array(ret)
 
         # outlier inlier filtering
-        model, inliers = ransac((x[0] for x in ret,
+        model, inliers = ransac(([x[0] for x in ret],
                                 [x[1] for x in ret]), FundamentalMatrixTransform,
                                 min_samples=8, residual_threshold=0.01, max_trial=100 )
 
