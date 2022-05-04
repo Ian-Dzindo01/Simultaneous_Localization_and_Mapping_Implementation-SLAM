@@ -32,16 +32,21 @@ class FeatureExtractor(object):
                     kp2 = self.last['kps'][m.trainIdx].pt
                     ret.append((kp1, kp2))
 
-        ret = np.array(ret)
+        if len(ret) > 0:
+            ret = np.array(ret)
+            print(ret.shape)
 
-        # outlier inlier filtering
-        model, inliers = ransac(([x[0] for x in ret],
-                                [x[1] for x in ret]), FundamentalMatrixTransform,
-                                min_samples=8, residual_threshold=0.01, max_trial=100 )
+            # outlier inlier filtering
+            model, inliers = ransac((ret[:,0], ret[:,1]),
+                                    FundamentalMatrixTransform,
+                                    min_samples=8,
+                                    residual_threshold=0.01,
+                                    max_trials=100)
 
 
 
-        print(sum(inliers))
+            print(sum(inliers))
+
 
         self.last = {'kps' : kps, 'des' : des}     # keypoints and descriptors
         return ret
