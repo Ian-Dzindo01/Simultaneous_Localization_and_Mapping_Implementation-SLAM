@@ -3,12 +3,12 @@ import numpy as np
 
 np.set_printoptions(suppress=True)
 
-from skimage.measure import ransac    # random sample consensus, deals with outliers
+from skimage.measure import ransac      # random sample consensus, deals with outliers
 from skimage.transform import FundamentalMatrixTransform, EssentialMatrixTransform        # governs how points correspons to each other, geometric relations of image pairs
 
 # [[x, y]] -> [[x,y,1]]
 def add_ones(x):
-    return np.concatenate([x, np.ones((x.shape[0], 1))], axis=1)
+    return np.concatenate([x, np.ones((x.shape[0], 1))], axis=1)   # pad with ones
 
 class FeatureExtractor(object):
     GX = 16//2
@@ -52,10 +52,9 @@ class FeatureExtractor(object):
             ret = np.array(ret)
 
 
-            # noormalize coordinates: subtract to move to 0
-            ret[: ,: , 0] = np.dot(self.Kinv, ret[: ,: , 0])
-            ret[:, :, 0] -= img.shape[0]//2
-            ret[:, :, 1] -= img.shape[1]//2
+            # normalize coordinates: subtract to move to 0
+            ret[: ,0 , :] = np.dot(self.Kinv, add_ones(ret[:, 0 ,:]).T).T[:, 0:2]
+            ret[: ,1 , :] = np.dot(self.Kinv, add_ones(ret[:, 1 ,:]).T).T[:, 0:2]
 
             model, inliers = ransac((ret[:,0], ret[:,1]),
                                     FundamentalMatrixTransform,
@@ -63,7 +62,7 @@ class FeatureExtractor(object):
                                     residual_threshold=1,
                                     max_trials=100)
 
-            ret = ret[inliers]       # inlier removal
+            ret = ret[inliers]       # outlier removal
 
             # s,v,d = np.linalg.svd(model.params)     # singular value decomposition on matrix
             # print(v)
