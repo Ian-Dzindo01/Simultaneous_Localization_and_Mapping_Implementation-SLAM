@@ -1,21 +1,30 @@
 import cv2
 import numpy as np
-from skimage.measure import ransac
-from skimage.transform import FundamentalMatrixTransform, EssentialMatrixTransform        # governs how points correspons to each other
+
+np.set_printoptions(suppress=True)
+
+from skimage.measure import ransac    # random sample consensus, deals with outliers
+from skimage.transform import FundamentalMatrixTransform, EssentialMatrixTransform        # governs how points correspons to each other, geometric relations of image pairs
+
+# [[x, y]] -> [[x,y,1]]
+def add_ones(x):
+    return np.concatenate([x, np.ones((x.shape[0], 1))], axis=1)
 
 class FeatureExtractor(object):
     GX = 16//2
     GY = 12//2
 
-    def __init__(self, w, h):
+    def __init__(self, K):
         self.orb = cv2.ORB_create(100)   # 1000 nfeatures
         self.bf = cv2.BFMatcher(cv2.NORM_HAMMING)        # brute force matcher, norm type
         self.last = None
-        self.w, self.h = w,h
+        self.k = K
+        self.Kinv = np.linalg.inv(self.k)            # matrix inverse
 
-    def denormalize(pt):
-        return int(round(pt[0] + self.w)), int(round(pt[1] + self.h))
-
+    def denormalize(self, pt):
+        ret = np.dot(self.k, np.array([pt[0], pt[1], 1.0]))         # homogenous matrix dot product with inverse
+        # ret /= ret[2]
+        return int(round(ret[0])), int(round(ret[1]))
 
     def extract(self, img):
         # detection
@@ -44,6 +53,7 @@ class FeatureExtractor(object):
 
 
             # noormalize coordinates: subtract to move to 0
+            ret[: ,: , 0] = np.dot(self.Kinv, ret[: ,: , 0])
             ret[:, :, 0] -= img.shape[0]//2
             ret[:, :, 1] -= img.shape[1]//2
 
@@ -55,10 +65,13 @@ class FeatureExtractor(object):
 
             ret = ret[inliers]       # inlier removal
 
-            s,v,d = np.linalg.svd(model.params)     # singular value decomposition on matrix
-            print(v)
+            # s,v,d = np.linalg.svd(model.params)     # singular value decomposition on matrix
+            # print(v)
 
         self.last = {'kps' : kps, 'des' : des}     # keypoints and descriptors
         return ret
 
 # f is the focal length of the camera 1 radian = how many pixels?
+# Fundamental Matrix - uncalibrated camera  coplanarity constraint
+# Essential Matrix - calibrated camera
+

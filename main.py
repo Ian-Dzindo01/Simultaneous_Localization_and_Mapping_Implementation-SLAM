@@ -2,6 +2,7 @@
 
 import cv2
 import time
+import numpy as np
 from display import Display
 from featureExtractor import FeatureExtractor
 
@@ -9,8 +10,12 @@ from featureExtractor import FeatureExtractor
 W = 1920//2
 H = 1080//2
 
+F = 1
+
+K = np.array(([F,0,W//2], [0,F,H//2], [0,0,1]))    # intrinsic matrix
+
 display = Display(W, H)
-fe = FeatureExtractor(W, H)
+fe = FeatureExtractor(K)
 
 def process_image(img):
     img = cv2.resize(img, (W,H))    # image resize to W, H
