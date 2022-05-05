@@ -10,7 +10,7 @@ W = 1920//2
 H = 1080//2
 
 display = Display(W, H)
-fe = FeatureExtractor()
+fe = FeatureExtractor(W, H)
 
 def process_image(img):
     img = cv2.resize(img, (W,H))    # image resize to W, H
@@ -19,9 +19,8 @@ def process_image(img):
     print("%d matches" % (len(matches)))
 
     for pt1, pt2 in matches:
-        u1,v1 = map(lambda x: int(round(x)), pt1)         # unzip match data
-        u2,v2 = map(lambda x: int(round(x)), pt2)
-
+        u1,v1 = fe.denormalize(pt1)
+        u2,v2 = fe.denormalize(pt2)
         cv2.circle(img, (u1, v1), color=(0,255,0), radius=3)      # draw circles aroung the matches
         cv2.line(img, (u1, v1), (u2, v2), color=(255,0,0))        # draw lines in between
 
@@ -29,7 +28,7 @@ def process_image(img):
 
 
 if __name__ == "__main__":
-    cap = cv2.VideoCapture("video/test1.mp4")
+    cap = cv2.VideoCapture("video/test2.mp4")
 
     while cap.isOpened():
         ret, frame = cap.read()

@@ -1,16 +1,21 @@
 import cv2
 import numpy as np
 from skimage.measure import ransac
-from skimage.transform import FundamentalMatrixTransform       # governs how points correspons to each other
+from skimage.transform import FundamentalMatrixTransform, EssentialMatrixTransform        # governs how points correspons to each other
 
 class FeatureExtractor(object):
     GX = 16//2
     GY = 12//2
 
-    def __init__(self):
+    def __init__(self, w, h):
         self.orb = cv2.ORB_create(100)   # 1000 nfeatures
         self.bf = cv2.BFMatcher(cv2.NORM_HAMMING)        # brute force matcher, norm type
         self.last = None
+        self.w, self.h = w,h
+
+    def denormalize(pt):
+        return int(round(pt[0] + self.w)), int(round(pt[1] + self.h))
+
 
     def extract(self, img):
         # detection
@@ -32,25 +37,28 @@ class FeatureExtractor(object):
                     kp2 = self.last['kps'][m.trainIdx].pt
                     ret.append((kp1, kp2))
 
+
+        # outlier inlier filtering using fundamental matrices
         if len(ret) > 0:
             ret = np.array(ret)
-            print(ret.shape)
 
-            # outlier inlier filtering
+
+            # noormalize coordinates: subtract to move to 0
+            ret[:, :, 0] -= img.shape[0]//2
+            ret[:, :, 1] -= img.shape[1]//2
+
             model, inliers = ransac((ret[:,0], ret[:,1]),
                                     FundamentalMatrixTransform,
                                     min_samples=8,
-                                    residual_threshold=0.01,
+                                    residual_threshold=1,
                                     max_trials=100)
 
+            ret = ret[inliers]       # inlier removal
 
-
-            print(sum(inliers))
-
+            s,v,d = np.linalg.svd(model.params)     # singular value decomposition on matrix
+            print(v)
 
         self.last = {'kps' : kps, 'des' : des}     # keypoints and descriptors
         return ret
 
-
-# train image is the one learned, query is the image you are trying to match with the
-# ones already trained
+# f is the focal length of the camera 1 radian = how many pixels?
