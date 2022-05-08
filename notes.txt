@@ -14,4 +14,7 @@ a grid.
 - RANSAC is used to negate the massive effect of outliers. Sensor data will always be
   imperfect.
 
+- We are going to try to make maps of this small chunk of world.
+
+- Intrinsic matrix - a matrix relating a camera's internal properties to an ideal pinhole-camera model.
 ################################################################
