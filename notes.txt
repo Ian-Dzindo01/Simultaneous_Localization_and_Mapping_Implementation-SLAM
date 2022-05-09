@@ -16,5 +16,4 @@ a grid.
 
 - We are going to try to make maps of this small chunk of world.
 
-- Intrinsic matrix - a matrix relating a camera's internal properties to an ideal pinhole-camera model.
-################################################################
+- Intrinsic matrix - a matrix relating a camera's internal properties to an ideal pinhole-camera model. - how a 3d point is mapped to a 2D image plane.

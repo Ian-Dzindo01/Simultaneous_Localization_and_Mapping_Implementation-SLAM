@@ -32,6 +32,7 @@ def process_image(img):
     display.draw(img)        # display image
 
 
+# video capture
 if __name__ == "__main__":
     cap = cv2.VideoCapture("video/test2.mp4")
 
@@ -42,25 +43,3 @@ if __name__ == "__main__":
             process_image(frame)
         else:
             break
-
-
-
-# # run detect in grid
-# sy = img.shape[0]//self.GX
-# sx = img.shape[1]//self.GX
-
-# akp = []
-# for ry in range(0, img.shape[0], sy):
-#     for rx in range(0, img.shape[1], sx):
-#         img_block = img[ry:ry+sy, rx:rx+sx]           # working in a grid range
-#         kp = self.orb.detect(img_block, None)         # keypoints and descriptors
-
-#         for p in kp:
-#             p.pt = (p.pt[0] + rx, p.pt[1] + ry)
-#             akp.append(p)
-
-# return akp
-
-# for p in kps:
-#     u, v = map(lambda x: int(round(x)), p.pt)            # extract feature locations
-#     cv2.circle(img, (u,v), color=(0,255,0), radius=3)    # draw circle around points

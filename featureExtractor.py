@@ -23,7 +23,7 @@ class FeatureExtractor(object):
 
 
     def normalize(self, pts):
-        return np.dot(self.Kinv, add_ones(pts.T).T)[:, 0:2]    # dot product of inverse and
+        return np.dot(self.Kinv, add_ones(pts.T).T)[:, 0:2]     # take only the first 2 columns, dot product of inverse transpose
 
 
     def denormalize(self, pt):
@@ -34,8 +34,8 @@ class FeatureExtractor(object):
 
     def extract(self, img):
         # detection
-        feats = cv2.goodFeaturesToTrack(np.mean(img, axis=2).astype(np.uint8), 3000, qualityLevel=0.01, minDistance=3)    # strong corners on an image
-                                                                                                                          # image needs to be black and white
+        feats = cv2.goodFeaturesToTrack(np.mean(img, axis=2).astype(np.uint8), 3000, qualityLevel=0.01, minDistance=3)      # strong corners on an image
+                                                                                                                            # image needs to be black and white
         # extraction
         kps = [cv2.KeyPoint(x=f[0][0], y=f[0][1], size=20) for f in feats]           # extract keypoints from features
         kps, des = self.orb.compute(img, kps)                                        # compute keypoints and descriptors
