@@ -10,7 +10,7 @@ from featureExtractor import FeatureExtractor
 W = 1920//2
 H = 1080//2
 
-F = 1
+F = 705             # focal length - estimated
 
 K = np.array(([F,0,W//2], [0,F,H//2], [0,0,1]))    # intrinsic matrix
 
@@ -34,7 +34,7 @@ def process_image(img):
 
 # video capture
 if __name__ == "__main__":
-    cap = cv2.VideoCapture("video/test2.mp4")
+    cap = cv2.VideoCapture("video/test1.mp4")
 
     while cap.isOpened():
         ret, frame = cap.read()

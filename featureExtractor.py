@@ -6,6 +6,8 @@ np.set_printoptions(suppress=True)
 from skimage.measure import ransac      # random sample consensus, deals with outliers
 from skimage.transform import FundamentalMatrixTransform, EssentialMatrixTransform        # governs how points correspons to each other, geometric relations of image pairs
 
+f_est_avg = []
+
 # [[x, y]] -> [[x,y,1]]
 def add_ones(x):
     return np.concatenate([x, np.ones((x.shape[0], 1))], axis=1)   # pad with ones (parameter 1)
@@ -23,11 +25,12 @@ class FeatureExtractor(object):
 
 
     def normalize(self, pts):
-        return np.dot(self.Kinv, add_ones(pts.T).T)[:, 0:2]     # take only the first 2 columns, dot product of inverse transpose
+        return np.dot(self.Kinv, add_ones(pts).T).T[:, 0:2]     # take only the first 2 columns, dot product of inverse transpose
 
 
     def denormalize(self, pt):
         ret = np.dot(self.k, np.array([pt[0], pt[1], 1.0]))         # homogenous matrix dot product with inverse
+        # maybe?
         # ret /= ret[2]
         return int(round(ret[0])), int(round(ret[1]))
 
@@ -38,12 +41,12 @@ class FeatureExtractor(object):
                                                                                                                             # image needs to be black and white
         # extraction
         kps = [cv2.KeyPoint(x=f[0][0], y=f[0][1], size=20) for f in feats]           # extract keypoints from features
-        kps, des = self.orb.compute(img, kps)                                        # compute keypoints and descriptors
+        kps, des = self.orb.compute(img, kps)
 
         # matching
         ret = []
-        if self.last is not None:
-            matches = self.bf.knnMatch(des, self.last['des'], k=2)                         # using knn instead of regular match
+        if self.last is not None:        # last not empty
+            matches = self.bf.knnMatch(des, self.last['des'], k=2)                         # using knn instead of regular match, 2 best matchess, matches current with previous frame
 
             # ratio test
             for m,n in matches:
@@ -59,8 +62,8 @@ class FeatureExtractor(object):
 
 
             # normalize coordinates: subtract to move to 0
-            ret[: ,0 , :] = np.dot(self.Kinv, add_ones(ret[:, 0 ,:]).T).T[:, 0:2]
-            ret[: ,1 , :] = np.dot(self.Kinv, add_ones(ret[:, 1 ,:]).T).T[:, 0:2]
+            ret[: ,0 , :] = self.normalize(ret[:, 0 , :])
+            ret[: ,1 , :] = self.normalize(ret[: ,1 , :])
 
             model, inliers = ransac((ret[:,0], ret[:,1]),
                                     FundamentalMatrixTransform,
@@ -70,8 +73,11 @@ class FeatureExtractor(object):
 
             ret = ret[inliers]       # outlier removal
 
-            # s,v,d = np.linalg.svd(model.params)     # singular value decomposition on matrix
-            # print(v)
+            s,v,d = np.linalg.svd(model.params)     # singular value decomposition on matrix
+            f_est = np.sqrt(2)/((v[0] + v[1])/2)
+            print(f_est, np.median(f_est_avg))
+            f_est_avg.append(f_est)
+
 
         self.last = {'kps' : kps, 'des' : des}     # keypoints and descriptors
         return ret
@@ -79,4 +85,5 @@ class FeatureExtractor(object):
 # f is the focal length of the camera 1 radian = how many pixels?
 # Fundamental Matrix - uncalibrated camera  coplanarity constraint
 # Essential Matrix - calibrated camera
-
+# We have to get focal length of center - distance between lens and sensor in camera
+# v should be sqrt(2), sqrt(2) and 0?
