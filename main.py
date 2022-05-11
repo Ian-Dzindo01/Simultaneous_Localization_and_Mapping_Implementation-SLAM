@@ -10,7 +10,7 @@ from featureExtractor import FeatureExtractor
 W = 1920//2
 H = 1080//2
 
-F = 705             # focal length - estimated
+F = 260             # focal length - estimated, it is sqrt(2)/2, for him it is 200
 
 K = np.array(([F,0,W//2], [0,F,H//2], [0,0,1]))    # intrinsic matrix
 

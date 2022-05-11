@@ -66,24 +66,39 @@ class FeatureExtractor(object):
             ret[: ,1 , :] = self.normalize(ret[: ,1 , :])
 
             model, inliers = ransac((ret[:,0], ret[:,1]),
-                                    FundamentalMatrixTransform,
+                                    # FundamentalMatrixTransform,
+                                    EssentialMatrixTransform,
                                     min_samples=8,
-                                    residual_threshold=1,
+                                    residual_threshold=0.001,          # for him it is 0.005
                                     max_trials=100)
 
             ret = ret[inliers]       # outlier removal
 
-            s,v,d = np.linalg.svd(model.params)     # singular value decomposition on matrix
-            f_est = np.sqrt(2)/((v[0] + v[1])/2)
-            print(f_est, np.median(f_est_avg))
-            f_est_avg.append(f_est)
+            u,w,vt = np.linalg.svd(model.params)     # singular value decomposition on matrix
+            W = np.mat([[0,-1,0],[1,0,0],[0,0,1]], dtype=float)
 
+            assert np.linalg.det(u) > 0
+
+            if np.linalg.det(vt) < 0:
+                 vt *= -1.0
+
+            R1 = np.dot(np.dot(u, W), vt)
+            R2 = np.dot(np.dot(u, W.T), vt)
+
+            print(R1)
+            print(R2)
 
         self.last = {'kps' : kps, 'des' : des}     # keypoints and descriptors
         return ret
 
 # f is the focal length of the camera 1 radian = how many pixels?
-# Fundamental Matrix - uncalibrated camera  coplanarity constraint
+# Fundamental Matrix - uncalibrated camera  coplanarity constraint - both used for describing geometric relations between pairs of images
 # Essential Matrix - calibrated camera
 # We have to get focal length of center - distance between lens and sensor in camera
+
+# f_est = np.sqrt(2)/((vt[0] + vt[1])/2)
+# print(f_est, np.median(f_est_avg))
+# f_est_avg.append(f_est)
+
 # v should be sqrt(2), sqrt(2) and 0?
+# we can use svd on essential matrix to estimate translation and rotation
