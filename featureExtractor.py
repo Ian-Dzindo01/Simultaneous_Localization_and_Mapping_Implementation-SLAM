@@ -12,6 +12,22 @@ f_est_avg = []
 def add_ones(x):
     return np.concatenate([x, np.ones((x.shape[0], 1))], axis=1)   # pad with ones (parameter 1)
 
+def extractRt(E):
+    U,w,Vt = np.linalg.svd(E)     # singular value decomposition on matrix
+    W = np.mat([[0,-1,0],[1,0,0],[0,0,1]], dtype=float)
+
+    assert np.linalg.det(U) > 0
+
+    if np.linalg.det(Vt) < 0:
+         Vt *= -1.0
+
+    R = np.dot(np.dot(U, W), Vt)
+
+    if np.sum(R.diagonal()) < 0:
+        R = np.dot(np.dot(U, W.T), Vt)
+
+    t = U[:, 2]
+
 class FeatureExtractor(object):
     GX = 16//2        # ??
     GY = 12//2        # ??
@@ -70,23 +86,10 @@ class FeatureExtractor(object):
                                     EssentialMatrixTransform,
                                     min_samples=8,
                                     residual_threshold=0.001,          # for him it is 0.005
-                                    max_trials=100)
+                                    max_trials=200)
 
             ret = ret[inliers]       # outlier removal
-
-            u,w,vt = np.linalg.svd(model.params)     # singular value decomposition on matrix
-            W = np.mat([[0,-1,0],[1,0,0],[0,0,1]], dtype=float)
-
-            assert np.linalg.det(u) > 0
-
-            if np.linalg.det(vt) < 0:
-                 vt *= -1.0
-
-            R1 = np.dot(np.dot(u, W), vt)
-            R2 = np.dot(np.dot(u, W.T), vt)
-
-            print(R1)
-            print(R2)
+            extractRt(model.params)
 
         self.last = {'kps' : kps, 'des' : des}     # keypoints and descriptors
         return ret
